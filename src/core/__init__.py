@@ -1,4 +1,4 @@
-from ..version import VERSION
+from ..version import VERSION, VERSION_SHORT
 from ..config import (
     ActivationType,
     BlockType,
@@ -16,6 +16,7 @@ from ..model import Elevation, ElevationOutput
 
 __all__ = [
     "VERSION",
+    "VERSION_SHORT",
     # Configs
     "ActivationType",
     "BlockType",

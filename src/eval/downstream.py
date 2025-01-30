@@ -1,24 +1,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Callable, Dict
 
 
 @dataclass
 class Task:
     name: str
+    run: Callable[[], float]
 
     def evaluate(self) -> float:  # pragma: no cover - placeholder
-        return 0.0
+        return float(self.run())
 
 
-__all__ = ["Task"]
-from __future__ import annotations
-
-from typing import Dict
-
-
-def get_task_registry() -> Dict[str, str]:  # pragma: no cover - placeholder
-    return {"mmlu": "Multiple-choice QA (toy)", "lambada": "Completion (toy)"}
+def get_task_registry() -> Dict[str, Task]:  # pragma: no cover - placeholder
+    return {
+        "mmlu": Task(name="mmlu", run=lambda: 0.0),
+        "lambada": Task(name="lambada", run=lambda: 0.0),
+    }
 
 
-__all__ = ["get_task_registry"]
+__all__ = ["Task", "get_task_registry"]

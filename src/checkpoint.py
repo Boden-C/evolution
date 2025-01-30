@@ -1,21 +1,12 @@
-from .runtime.checkpoint import *  # noqa: F401,F403
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional
-
+# Re-export runtime checkpointer API and provide convenience constructors.
+from .runtime.checkpoint import Checkpointer as Checkpointer  # noqa: F401
 from .aliases import PathOrStr
 
 
-@dataclass
-class Checkpointer:
-    save_folder: PathOrStr
-
-    def save(self, name: str = "model") -> None:  # pragma: no cover - I/O shim
-        return None
-
-    def load(self, name: str = "model") -> Optional[dict]:  # pragma: no cover - I/O shim
-        return None
+def make_checkpointer(save_folder: PathOrStr) -> Checkpointer:
+    return Checkpointer(save_folder)
 
 
-__all__ = ["Checkpointer"]
+__all__ = ["Checkpointer", "make_checkpointer"]

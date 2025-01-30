@@ -40,6 +40,11 @@ class DistributedStrategy(StrEnum):
     fsdp = "fsdp"
 
 
+class PaddingDirection(StrEnum):
+    right = "right"
+    left = "left"
+
+
 @dataclass
 class ModelConfig:
     d_model: int = 768
@@ -88,11 +93,22 @@ class TokenizerConfig:
 
 
 @dataclass
+class DataConfig:
+    pad_direction: PaddingDirection = PaddingDirection.right
+    num_workers: int = 0
+    pin_memory: bool = False
+    prefetch_factor: int = 2
+    persistent_workers: bool = False
+    timeout: int = 0
+
+
+@dataclass
 class TrainConfig:
     model: ModelConfig = field(default_factory=ModelConfig)
     optimizer: OptimizerConfig = field(default_factory=OptimizerConfig)
     scheduler: SchedulerConfig = field(default_factory=SchedulerConfig)
     tokenizer: TokenizerConfig = field(default_factory=TokenizerConfig)
+    data: DataConfig = field(default_factory=DataConfig)
     seed: int = 1234
     distributed: DistributedStrategy = DistributedStrategy.single
     per_device_batch_size: int = 1
@@ -113,5 +129,7 @@ __all__ = [
     "OptimizerConfig",
     "SchedulerConfig",
     "TokenizerConfig",
+    "DataConfig",
+    "PaddingDirection",
     "TrainConfig",
 ]

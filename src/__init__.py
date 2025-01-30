@@ -3,7 +3,7 @@
 Public API is re-exported from grouped subpackages to keep imports stable.
 """
 
-from .version import VERSION
+from .core.version import VERSION
 from .config import (
     ActivationType,
     BlockType,
