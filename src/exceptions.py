@@ -1,20 +1,20 @@
-class ElevationError(Exception):
+class ModelError(Exception):
     """Base exception for Elevation."""
 
 
-class ConfigurationError(ElevationError):
+class ConfigurationError(ModelError):
     """Raised for invalid configuration values or incompatible settings."""
 
 
-class CheckpointError(ElevationError):
+class CheckpointError(ModelError):
     """Raised when loading/saving model state fails or is incompatible."""
 
 
-class TokenizerError(ElevationError):
+class TokenizerError(ModelError):
     """Raised for tokenizer initialization or I/O failures."""
 
 __all__ = [
-    "ElevationError",
+    "ModelError",
     "ConfigurationError",
     "CheckpointError",
     "TokenizerError",

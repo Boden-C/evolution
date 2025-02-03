@@ -1,14 +1,11 @@
 <div align="center">
   <img src="docs/assets/lightmode.svg" alt="Evolution Logo" width="800"/>
   <br>
-  <h1>Evolution Series: Research on State of the Art Open Language Models</h1>
-  <h2>2025 Update - Introducing Elevation, the new flagship model<h2>
+  <h1>Evolution Series: State of the Art Open Language Models</h1>
+  <h3>2025 Update - Introducing Elevation, the new flagship model<h3>
 </div>
 
-
-Project Overview
-
-Elevation is the third generation in the Evolution series of advanced open-source language models, following the pioneering work of Embark and Emergence (both now deprecated). This project represents a new milestone in the design, training, and evaluation of state-of-the-art large language models (LLMs), d to advance the science and engineering of artificial intelligence.
+Elevation is the third generation in the Evolution series of personal open-source language models, following the pioneering work of Embark and Emergence (both now deprecated). This research project was built upon the work of OLMo at AllenAI and uses all the professional methods for creating a state-of-the-art model. The model is made to excel in custom specialized fields based on its configuration and training.
 
 ## Research Motivation
 
@@ -53,11 +50,25 @@ To train and build Elevation from source:
 If you use Elevation or the Evolution series in your research, please cite this project:
 
 ```bibtex
-@misc{evolution2024elevation,
-      title={Elevation: The Evolution Series State-of-the-Art Language Model},
-      author={Your Name and Contributors},
-      year={2024},
-      url={https://github.com/YOUR_ORG/Evolution},
+@misc{evolution2025elevation,
+   title={Elevation: The Evolution Series State-of-the-Art Language Model},
+   author={Evolution Contributors},
+   year={2025},
+   url={https://github.com/Boden-C/evolution},
+}
+```
+
+This project builds on the OLMo effort. Please also cite their work:
+
+```bibtex
+@misc{olmo20242olmo2furious,
+   title={2 OLMo 2 Furious},
+   author={Team OLMo and Pete Walsh and Luca Soldaini and Dirk Groeneveld and Kyle Lo and Shane Arora and Akshita Bhagia and Yuling Gu and Shengyi Huang and Matt Jordan and Nathan Lambert and Dustin Schwenk and Oyvind Tafjord and Taira Anderson and David Atkinson and Faeze Brahman and Christopher Clark and Pradeep Dasigi and Nouha Dziri and Michal Guerquin and Hamish Ivison and Pang Wei Koh and Jiacheng Liu and Saumya Malik and William Merrill and Lester James V. Miranda and Jacob Morrison and Tyler Murray and Crystal Nam and Valentina Pyatkin and Aman Rangapur and Michael Schmitz and Sam Skjonsberg and David Wadden and Christopher Wilhelm and Michael Wilson and Luke Zettlemoyer and Ali Farhadi and Noah A. Smith and Hannaneh Hajishirzi},
+   year={2024},
+   eprint={2501.00656},
+   archivePrefix={arXiv},
+   primaryClass={cs.CL},
+   url={https://arxiv.org/abs/2501.00656},
 }
 ```
 

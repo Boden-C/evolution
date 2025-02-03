@@ -1,0 +1,65 @@
+# CFF version
+cff-version: 1.2.0
+
+# Basic project metadata
+title: "Evolution: Open Language Model Research (Elevation series)"
+version: "0.1.0"
+date-released: "2025-08-26"
+message: "If you use this software, please cite it using the following metadata."
+
+authors:
+  - name: "Evolution Contributors"
+
+repository-code: "https://github.com/Boden-C/evolution"
+license: "Apache-2.0"
+
+identifiers:
+  - type: url
+    value: "https://github.com/Boden-C/evolution"
+
+references:
+  - type: article
+    title: "2 OLMo 2 Furious"
+    authors:
+      - name: "Team OLMo"
+      - name: "Pete Walsh"
+      - name: "Luca Soldaini"
+      - name: "Dirk Groeneveld"
+      - name: "Kyle Lo"
+      - name: "Shane Arora"
+      - name: "Akshita Bhagia"
+      - name: "Yuling Gu"
+      - name: "Shengyi Huang"
+      - name: "Matt Jordan"
+      - name: "Nathan Lambert"
+      - name: "Dustin Schwenk"
+      - name: "Oyvind Tafjord"
+      - name: "Taira Anderson"
+      - name: "David Atkinson"
+      - name: "Faeze Brahman"
+      - name: "Christopher Clark"
+      - name: "Pradeep Dasigi"
+      - name: "Nouha Dziri"
+      - name: "Michal Guerquin"
+      - name: "Hamish Ivison"
+      - name: "Pang Wei Koh"
+      - name: "Jiacheng Liu"
+      - name: "Saumya Malik"
+      - name: "William Merrill"
+      - name: "Lester James V. Miranda"
+      - name: "Jacob Morrison"
+      - name: "Tyler Murray"
+      - name: "Crystal Nam"
+      - name: "Valentina Pyatkin"
+      - name: "Aman Rangapur"
+      - name: "Michael Schmitz"
+      - name: "Sam Skjonsberg"
+      - name: "David Wadden"
+      - name: "Christopher Wilhelm"
+      - name: "Michael Wilson"
+      - name: "Luke Zettlemoyer"
+      - name: "Ali Farhadi"
+      - name: "Noah A. Smith"
+      - name: "Hannaneh Hajishirzi"
+    year: 2024
+    url: "https://arxiv.org/abs/2501.00656"
