@@ -28,6 +28,7 @@ class BaseConfig:
 
     @classmethod
     def _register_resolvers(cls, validate_paths: bool = True):
+        # Expands path globs into a list.
         def path_glob(*paths) -> List[str]:
             out = []
             for path in paths:
@@ -37,6 +38,7 @@ class BaseConfig:
                 out.extend(matches)
             return out
 
+        # Chooses the first path in the arguments that exists.
         def path_choose(*paths) -> str:
             from .util import is_url
 
@@ -48,6 +50,7 @@ class BaseConfig:
             else:
                 return ""
 
+        # Finds the latest checkpoint in a folder.
         def path_last_checkpoint(path) -> str:
             from .util import find_latest_checkpoint
 
@@ -66,6 +69,9 @@ class BaseConfig:
 
     @classmethod
     def update_legacy_settings(cls, config: D) -> D:
+        """
+        Update the legacy config settings whose schemas have undergone backwards-incompatible changes.
+        """
         return config
 
     @classmethod
@@ -87,6 +93,7 @@ class BaseConfig:
         key: Optional[str] = None,
         validate_paths: bool = True,
     ) -> C:
+        """Load from a YAML file."""
         cls._register_resolvers(validate_paths=validate_paths)
         schema = om.structured(cls)
         try:
@@ -102,6 +109,7 @@ class BaseConfig:
             raise ConfigurationError(str(e))
 
     def save(self, path: PathOrStr) -> None:
+        """Save to a YAML file."""
         om.save(config=self, f=str(path))
 
     def asdict(self, exclude: Optional[Iterable[str]] = None) -> Dict[str, Any]:

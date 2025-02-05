@@ -5,7 +5,7 @@ from typing import Optional
 
 from .config import ModelConfig
 from .exceptions import ConfigurationError
-from .torch_util import get_default_device
+from .util.torch_util import get_default_device
 
 
 @dataclass

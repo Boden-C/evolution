@@ -17,7 +17,7 @@ from typing import Any, Callable, Deque, Dict, List, Optional, Tuple, Union, Tex
 # Internal imports
 from ..config import TrainConfig
 from ..model import Elevation
-from ..torch_util import seed_all
+from ..util.torch_util import seed_all
 from .optimizer import build_optimizer, build_scheduler
 from .checkpoint import Checkpointer
 from ..text.tokenizer import Tokenizer
@@ -31,6 +31,8 @@ except Exception:  # pragma: no cover - soft dependency
 try:  # pragma: no cover - soft dependency
     import torch  # type: ignore
     import torch.nn.functional as F  # type: ignore
+    import torch.utils
+    import torch.utils.hooks
 except Exception:  # pragma: no cover - soft dependency
     torch = None  # type: ignore
     F = None  # type: ignore
@@ -201,6 +203,10 @@ class Trainer:
     checkpointer: Optional[Checkpointer] = field(default=None, init=False)
     dist_model: Union[DDP, FSDP] = field(default=None, init=False)
 
+    # Optional data integration
+    train_loader: Optional[Any] = field(default=None)
+    evaluators: List[Any] = field(default_factory=list)
+
     # State
     epoch: int = field(default=0, init=False)
     global_step: int = field(default=0, init=False)
@@ -209,12 +215,16 @@ class Trainer:
     min_train_loss: float = field(default=float("inf"), init=False)
     cur_train_loss: float = field(default=float("inf"), init=False)
 
+    # Checkpoint bookkeeping
+    checkpoints: List[Path] = field(default_factory=list, init=False)
+    unsharded_checkpoints: List[Path] = field(default_factory=list, init=False)
+    ephemeral_checkpoints: List[Path] = field(default_factory=list, init=False)
+
     # Options
     loss_fn: Callable[..., Any] = field(default=cross_entropy_loss, init=False)
     device: Optional["torch.device"] = field(default=None, init=False)  # type: ignore[name-defined]
 
     # Evaluation
-    evaluators: List[Any] = field(default_factory=list)
     indices_file: Optional[TextIO] = None
 
     # Timing and state
@@ -418,7 +428,21 @@ class Trainer:
         try:
             ckpt_name = name or f"step-{self.global_step}"
             self.checkpointer.save(name=ckpt_name)
-            return Path(self.cfg.save_folder) / ckpt_name
+            path = Path(self.cfg.save_folder) / ckpt_name
+            # bookkeep
+            if ckpt_name.endswith("-unsharded"):
+                self.unsharded_checkpoints.append(path)
+            else:
+                self.checkpoints.append(path)
+            # try to create 'latest' symlink on local filesystem
+            try:
+                latest = Path(self.cfg.save_folder) / ("latest-unsharded" if ckpt_name.endswith("-unsharded") else "latest")
+                if latest.exists() or latest.is_symlink():
+                    latest.unlink()
+                latest.symlink_to(path.name, target_is_directory=True)
+            except Exception:
+                pass
+            return path
         except Exception:
             return None
 
@@ -475,6 +499,49 @@ class Trainer:
                 z_loss = z_loss.view(batch["input_ids"].shape[0], -1)
         return ce_loss, z_loss, logits
 
+    def _setup_module_output_save_hooks(self, micro_batch_idx: int) -> list:
+        # Save module inputs/outputs for trace debugging when requested in cfg
+        if (
+            getattr(self.cfg, "module_outputs_save_steps", None) is None
+            or self.global_step not in getattr(self.cfg, "module_outputs_save_steps", [])
+        ):
+            return []
+
+        if micro_batch_idx != 0:
+            return []
+
+        trace_save_folder = Path(self.cfg.save_folder) / f"traces/step{self.global_step}"
+        if trace_save_folder.exists():
+            if getattr(self.cfg, "save_overwrite", False):
+                shutil.rmtree(trace_save_folder)
+            else:
+                raise RuntimeError("Attempting to overwrite traces without save_overwrite enabled")
+        trace_save_folder.mkdir(parents=True, exist_ok=True)
+
+        def trace_outputs_hook(module_name: str, _: object, args: tuple, output: object) -> None:
+            module_input = args[0] if len(args) > 0 else None
+            trace_dir = Path(self.cfg.save_folder) / f"traces/step{self.global_step}"
+            trace_dir.mkdir(parents=True, exist_ok=True)
+            occ = 0
+            while (trace_dir / f"{module_name}_{occ}_input.pt").exists():
+                occ += 1
+            try:
+                if module_input is not None:
+                    torch.save(module_input, trace_dir / f"{module_name}_{occ}_input.pt")
+                torch.save(output, trace_dir / f"{module_name}_{occ}_output.pt")
+            except Exception:
+                pass
+
+        output_hooks = []
+        if torch is None:
+            return []
+        for module_name, module in getattr(self.model, "named_modules", lambda: [])(prefix="model"):
+            try:
+                output_hooks.append(module.register_forward_hook(functools.partial(trace_outputs_hook, module_name)))
+            except Exception:
+                continue
+        return output_hooks
+
     def split_batch(self, batch: Dict[str, Any]) -> List[Dict[str, Any]]:
         micro = int(getattr(self.cfg, "device_train_microbatch_size", 0) or 0)
         if micro <= 0:
@@ -514,15 +581,21 @@ class Trainer:
         batch_size_in_tokens = int(batch["input_ids"].numel())
         ce_batch_loss = torch.tensor(0.0, device=self.device)
         z_batch_loss = None if not getattr(self.cfg, "softmax_auxiliary_loss", False) else torch.tensor(0.0, device=self.device)
+        num_micro_batches = len(micro_batches)
         for idx, micro in enumerate(micro_batches):
             grad_sync_context = nullcontext
-            # DDP batch sync placeholder: no-op by default
             with grad_sync_context():
                 autocast_device = "mps" if (self.device is not None and self.device.type == "mps") else "cuda"
                 try:
                     ctx = torch.autocast(autocast_device, enabled=True, dtype=getattr(self.cfg, "autocast_precision", None))
                 except Exception:
                     ctx = nullcontext()
+                # Register optional output hooks for tracing
+                output_hooks = []
+                try:
+                    output_hooks = self._setup_module_output_save_hooks(idx)
+                except Exception:
+                    output_hooks = []
                 with ctx:
                     loss, ce_loss, z_loss = self.train_micro_batch(micro, batch_size_in_tokens)
                     ce_batch_loss += ce_loss.detach()
@@ -530,6 +603,11 @@ class Trainer:
                         assert z_batch_loss is not None
                         z_batch_loss += z_loss.detach()
                 loss.backward()
+                for h in output_hooks:
+                    try:
+                        h.remove()
+                    except Exception:
+                        pass
         return ce_batch_loss, z_batch_loss
 
     def train_step(self, batch: Dict[str, Any], reduce_global_loss: bool = True) -> Dict[str, float]:
@@ -538,6 +616,13 @@ class Trainer:
         metrics: Dict[str, float] = {}
         if hasattr(self.optimizer, "zero_grad"):
             self.optimizer.zero_grad(set_to_none=True)
+        # Write indices if present
+        if self.indices_file and "index" in batch:
+            try:
+                indices = "\t".join(str(int(i)) for i in batch["index"])
+                self.indices_file.write(f"{self.global_step}\t{indices}\n")
+            except Exception:
+                pass
         batch = self._to_device(batch)
         ce_batch_loss, z_batch_loss = self.train_batch(batch)
         # No distributed reduction here; integration point for future dist support
@@ -610,40 +695,16 @@ class Trainer:
         if hasattr(evaluator, "update_metrics"):
             evaluator.update_metrics(batch, ce_loss, logits)
 
-    # ----------------------------
-    # System metrics & logging
-    # ----------------------------
-    def system_metrics(self) -> Dict[str, float]:
-        out: Dict[str, float] = {}
-        if torch is None:
-            return out
-        try:
-            if self.global_step < 3 or self.global_step % 10 == 0:
-                peak_gpu_mb = None
-                if torch.cuda.is_available():
-                    peak = torch.cuda.max_memory_allocated() / (1024 ** 2)
-                    peak_gpu_mb = float(peak)
-                if peak_gpu_mb is not None:
-                    out["System/Peak GPU Memory (MB)"] = peak_gpu_mb
-        except Exception:
-            pass
-        return out
-
-    def should_log_this_step(self) -> bool:
-        return (self.global_step % int(getattr(self.cfg, "console_log_interval", 50) or 50)) == 0
-
-    def log_metrics_to_console(self, prefix: str, metrics: Dict[str, float]):
-        # format and print metrics like OLMo
-        log_str = " ".join(f"{k}={v:.4g}" for k, v in metrics.items())
-        log.info(f"{prefix} {log_str}")
-
     def eval(self) -> Dict[str, float]:
         # implement eval loop over self.evaluators, similar to OLMo
         log.info(f"Starting evaluation")
         total_loss = 0.0
         total_count = 0
         for evaluator in self.evaluators:
-            evaluator.reset()
+            try:
+                evaluator.reset()
+            except Exception:
+                pass
             with torch.no_grad():
                 for batch in evaluator:
                     ce_loss, logits = self.eval_batch(batch)
@@ -656,7 +717,7 @@ class Trainer:
         return {"eval/loss": avg_loss}
 
     # ----------------------------
-    # Fit loop (safe, minimal, non-executing by default)
+    # Cancellation, fit and lifecycle
     # ----------------------------
     def check_if_cancelled(self) -> Tuple[bool, int]:
         # implement cancellation logic via time_limit, early_stopping, wandb tag
@@ -664,24 +725,36 @@ class Trainer:
             return True, 0
         if self.cfg.early_stopping and self.global_step >= self.cfg.early_stopping:
             return True, 0
-        if wandb.run and wandb.run.resumed:
-            return True, 0
+        # check wandb tags to allow remote cancellation if possible
+        try:
+            if wandb.run is not None and os.environ.get("WANDB_API_KEY") is not None:
+                api = wandb.Api()
+                run = api.run(wandb.run.path)
+                for tag in run.tags or []:
+                    if str(tag).lower() in {"cancel", "canceled", "cancelled"}:
+                        return True, 0
+        except Exception:
+            pass
         return False, 0
 
     def fit(self) -> None:  # pragma: no cover - training skeleton
-        """Enterprise-style training loop skeleton with safe guards.
-        This is designed for learning and code reading, not for execution.
+        """Enterprise-style training loop with data-loader/eval integration.
+        This implementation is safe to import and intended for reading and testing; it will no-op when torch
+        or a train_loader is not available.
         """
         # Early exit if torch unavailable
         if torch is None:
             return None
 
-        # Optional profiling toggles (no-op by default)
+        # If a train_loader is provided, run a proper loop, otherwise keep the non-executing skeleton
+        if self.train_loader is None:
+            # Keep legacy skeleton to avoid surprising execution
+            return super().fit() if hasattr(super(), "fit") else None
+
+        # Profiling toggles
         python_profiler = None
         if bool(getattr(self.cfg, "python_profiling", False)):
             try:
-                import cProfile  # type: ignore
-
                 python_profiler = cProfile.Profile()
             except Exception:
                 python_profiler = None
@@ -695,65 +768,73 @@ class Trainer:
         total_steps = int(getattr(self.cfg.scheduler, "total_steps", 0) or self.max_steps or 0)
         base_lr = getattr(self.cfg.optimizer, "lr", None) or getattr(self.cfg.optimizer, "learning_rate", 0.0)
 
-        # Simulated loop (no real data pipeline wired here)
+        # initialize monitors
         self._start_time = time.monotonic()
-        for step in range(self.global_step, total_steps):
-            self.global_step = step + 1
-            # Scheduler step (scale LR) fallback
-            lr_scale = None
-            try:
-                lr_scale = self.scheduler.step()  # type: ignore[attr-defined]
-            except Exception:
-                pass
-            try:
-                if lr_scale is not None:
-                    if hasattr(self.optimizer, "set_lr"):
-                        self.optimizer.set_lr(float(base_lr) * float(lr_scale))
-                    else:
-                        for g in getattr(self.optimizer, "param_groups", []):
-                            g["lr"] = float(base_lr) * float(lr_scale)
-                else:
-                    new_lr = self.scheduler.get_lr(base_lr, self.scheduler_current, self.scheduler_max)  # type: ignore[attr-defined]
-                    for g in getattr(self.optimizer, "param_groups", []):
-                        g["lr"] = new_lr
-            except Exception:
-                pass
+        speed_monitor = SpeedMonitor()
+        lr_monitor = LRMonitor()
+        lr_monitor.optim = self.optimizer
 
-            # Placeholder for micro-batch processing, grads, step etc.
-            # self.optimizer.zero_grad(); loss.backward(); self.optimizer.step()
+        # Main loop
+        for epoch in range(self.epoch, 10 ** 9):
+            for batch in self.train_loader:
+                self.global_step += 1
+                # update bookkeeping
+                try:
+                    bsz, seq_len = batch["input_ids"].shape
+                    self.global_train_examples_seen_this_epoch += bsz
+                    self.global_train_tokens_seen += bsz * seq_len
+                except Exception:
+                    pass
 
-            # Periodic checkpoint (compatible with current Checkpointer API)
-            save_every = int(getattr(self.cfg, "save_interval", 0) or max(1, total_steps // 10))
-            if save_every > 0 and self.global_step % save_every == 0:
-                self.save_checkpoint(name=f"step-{self.global_step}")
+                should_log = self.should_log_this_step()
+                metrics = self.train_step(batch, reduce_global_loss=should_log)
 
-            # Logging hooks
-            if self.should_log_this_step():
-                metrics = {
-                    **self.speed.check(),
-                    **self.lrmon.check(),
-                    **self.system_metrics(),
-                }
-                self.log_metrics_to_console("Train", metrics)
+                if should_log:
+                    metrics.update(speed_monitor.check())
+                    metrics.update(self.system_metrics())
+                    metrics.update(self.lrmon.check())
+                    self.log_metrics_to_console(f"[step={self.global_step}/{self.max_steps},epoch={epoch}]", metrics)
+                    if wandb.run is not None and getattr(self.cfg, "wandb", None) is not None:
+                        try:
+                            wandb.log(metrics, step=self.global_step)
+                        except Exception:
+                            pass
 
-            # Optional stop
-            stop_at = getattr(self.cfg, "stop_at", None)
-            if isinstance(stop_at, int) and self.global_step >= stop_at:
+                # periodic checkpoint
+                save_every = int(getattr(self.cfg, "save_interval", 0) or max(1, total_steps // 10))
+                if save_every > 0 and self.global_step % save_every == 0:
+                    self.save_checkpoint(name=f"step-{self.global_step}")
+
+                # eval
+                if self.global_step % int(getattr(self.cfg, "eval_interval", 1000) or 1000) == 0:
+                    eval_metrics = self.eval()
+                    if wandb.run is not None:
+                        try:
+                            wandb.log(eval_metrics, step=self.global_step)
+                        except Exception:
+                            pass
+
+                cancelled, _ = self.check_if_cancelled()
+                if cancelled:
+                    log.info("Training cancelled, breaking")
+                    break
+
+                if self.global_step >= total_steps:
+                    break
+
+            # epoch end
+            self.epoch += 1
+            self.global_train_examples_seen_this_epoch = 0
+            if self.global_step >= total_steps:
                 break
 
-            # Check for cancellation
-            cancelled, cancel_code = self.check_if_cancelled()
-            if cancelled:
-                log.info(f"Training cancelled at step {self.global_step}")
-                break
-
-        # Final checkpoint save
+        # final checkpoint
         try:
             self.save_checkpoint(name=f"step-{self.global_step}")
         except Exception:
             pass
 
-        # Flush indices_file, reset gc, finish wandb
+        # cleanup
         self.close()
 
     def close(self, exit_code: int = 0) -> None:
@@ -768,7 +849,10 @@ class Trainer:
         except Exception:
             pass
         if wandb.run:
-            wandb.finish()
+            try:
+                wandb.finish()
+            except Exception:
+                pass
         if exit_code != 0:
             os._exit(exit_code)
 

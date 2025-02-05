@@ -34,10 +34,18 @@
     <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
       <path d="M32 0H0V32" fill="none" stroke="#DCE3F7" stroke-width="1"/>
     </pattern>
+
+    <!-- Rounded corner clip path to constrain all artwork to the rounded canvas -->
+    <clipPath id="roundClip">
+      <rect x="0" y="0" width="1200" height="400" rx="12" ry="12"/>
+    </clipPath>
   </defs>
 
+  <!-- All visible elements are clipped to the rounded canvas -->
+  <g clip-path="url(#roundClip)">
+
   <!-- Background -->
-  <rect width="1200" height="400" fill="url(#bg-grad)"/>
+  <rect width="1200" height="400" fill="url(#bg-grad)" rx="12" ry="12"/>
 
   <!-- Decorative glows -->
   <circle cx="980" cy="-40" r="260" fill="url(#glow-a)"/>
@@ -85,5 +93,7 @@
   <g transform="translate(360,320)" opacity="0.35">
     <path d="M0 40 C120 -40, 240 -40, 360 40" fill="none" stroke="#C7D2FE" stroke-width="2"/>
     <path d="M40 60 C160 -20, 280 -20, 400 60" fill="none" stroke="#BFDBFE" stroke-width="2"/>
+  </g>
+
   </g>
 </svg>

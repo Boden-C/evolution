@@ -6,7 +6,7 @@ Provides enterprise-level best practices, logging, and robust type checks.
 from __future__ import annotations
 
 import gc
-from .logger import get_logger
+from ..logger import get_logger
 import os
 import random
 from typing import Any, Optional, TypeVar

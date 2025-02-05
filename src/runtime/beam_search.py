@@ -11,8 +11,10 @@ try:
 except ImportError:
     torch = None
 
-from src.utils.logging import logger
+from src.logger import get_logger
 from src.configs import get_beam_search_config
+
+logger = get_logger(__name__)
 
 __all__ = [
     "Sampler",
