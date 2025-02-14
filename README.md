@@ -11,17 +11,17 @@ Elevation is the third generation in the Evolution series of personal open-sourc
 
 The Evolution series is driven by a commitment to open research, reproducibility, and technical innovation in AI. The 3 main goals are:
 
-- Create a more customizable model that can excel in specialized fields
-- Produce a cheap, tiny model that can easily accomplish specific tasks compared to popular models
-- Research and learn about open-source LLM models
+-   Create a more customizable model that can excel in specialized fields
+-   Produce a cheap, tiny model that can easily accomplish specific tasks compared to popular models
+-   Research and learn about open-source LLM models
 
 ## Design
 
 Elevation employs a multi-stage training pipeline.
 
-- **Stage 1:** Large-scale pretraining on diverse, high-volume datasets to capture broad linguistic and factual knowledge
-- **Stage 2:** Targeted fine-tuning on curated, high-quality corpora to enhance model specialization and robustness
-- **Model Averaging:** Multiple independent fine-tuning trajectories can be aggregated by weight averaging ("model soups") to produce a single, robust checkpoint. Uniform and weighted soups with coefficients $\alpha_i$ satisfying $\sum_i \alpha_i=1$ are supported conceptually. The implementation aligns state-dicts, handles compatible shape variations, can optionally apply layer-wise clipping, and perform post-average calibration (e.g. layer norm / logit scale) where implemented.
+-   **Stage 1:** Large-scale pretraining on diverse, high-volume datasets to capture broad linguistic and factual knowledge
+-   **Stage 2:** Targeted fine-tuning on curated, high-quality corpora to enhance model specialization and robustness
+-   **Model Averaging:** Multiple independent fine-tuning trajectories can be aggregated by weight averaging ("model soups") to produce a single, robust checkpoint. Uniform and weighted soups with coefficients $\alpha_i$ satisfying $\sum_i \alpha_i=1$ are supported conceptually. The implementation aligns state-dicts, handles compatible shape variations, can optionally apply layer-wise clipping, and perform post-average calibration (e.g. layer norm / logit scale) where implemented.
 
 ### Optimization Techniques
 
@@ -91,7 +91,7 @@ We continuously evaluate on curated validation slices (domain, length, difficult
 GPTQ performs low-bit per-channel or per-block quantization that approximately minimizes layerwise reconstruction error using second-order (Hessian-aware) criteria. Scales (and optional zero points) are stored per block alongside quantized weight integers. The simplified scalar formula below illustrates uniform quantization, not the full Hessian-aware procedure:
 
 $$
-Q(w)=\operatorname{round}\left(\frac{w}{s}\right)\cdot s, \quad s=\arg\min_s \|W - s\cdot Q(W)\|_F
+Q(w)=\text{round}\!\left(\frac{w}{s}\right)\cdot s, \quad s=\arg\min_s \|W - s\cdot Q(W)\|_F
 $$
 
 ## Model Creation
@@ -100,18 +100,18 @@ To train and build Elevation from source:
 
 1. Install [PyTorch](https://pytorch.org) and required dependencies for your system.
 2. Clone the Evolution repository:
-   ```bash
-   git clone https://github.com/YOUR_ORG/Evolution.git
-   cd Evolution
-   pip install -e .[all]
-   ```
+    ```bash
+    git clone https://github.com/YOUR_ORG/Evolution.git
+    cd Evolution
+    pip install -e .[all]
+    ```
 3. Prepare your training data according to the provided configuration templates.
 4. Launch training using the provided scripts and configuration files:
-   ```bash
-   torchrun --nproc_per_node=8 scripts/train.py configs/elevation-stage1.yaml
-   # For fine-tuning:
-   torchrun --nproc_per_node=8 scripts/train.py configs/elevation-stage2.yaml
-   ```
+    ```bash
+    torchrun --nproc_per_node=8 scripts/train.py configs/elevation-stage1.yaml
+    # For fine-tuning:
+    torchrun --nproc_per_node=8 scripts/train.py configs/elevation-stage2.yaml
+    ```
 5. All checkpoints and model artifacts will be saved locally for further analysis and deployment.
 
 ## Citation
