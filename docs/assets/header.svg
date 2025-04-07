@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="400" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title>Evolution Series - Light Mode</title>
+  <desc>A modern, light-mode banner with a sidebar listing Embark (Depracated), Emergence (Depracated), and a highlighted Elevation. Main title reads Evolution Series.</desc>
+
+  <style>
+    .anim-bg { opacity: 0; animation: fadeIn .6s ease-out both; }
+
+    .anim-glow { opacity: 0; transform-box: fill-box; transform-origin: 50% 50%; animation: scaleIn .9s cubic-bezier(.2,.8,.2,1) both; }
+    .anim-glow.glow-a { animation-delay: .1s; }
+    .anim-glow.glow-b { animation-delay: .2s; }
+
+    .anim-grid { opacity: 0; animation: fadeIn .6s ease-out .25s both; }
+
+    .sidebar-in { opacity: 0; animation: slideUp .6s cubic-bezier(.2,.8,.2,1) .2s both; }
+    .sidebar-in .item { opacity: 0; animation: fadeIn .4s ease-out both; }
+    .sidebar-in .item-1 { animation-delay: .35s; }
+    .sidebar-in .item-2 { animation-delay: .45s; }
+    .sidebar-in .item-3 { animation-delay: .55s; }
+
+    /* FIX: animate inner wrapper, not the translated group */
+    .sidebar-in .item .item-anim { transform-box: fill-box; transform-origin: 50% 50%; }
+    .sidebar-in .item-3 .item-anim { animation: scaleIn .5s cubic-bezier(.2,.8,.2,1) .55s both; }
+
+    .title-in { opacity: 0; animation: slideRight .6s ease-out .3s both; }
+    .title-in .title-text { opacity: 0; animation: slideRight .6s ease-out .45s both; }
+    .underline { opacity: 0; transform-box: fill-box; transform-origin: 0 50%; animation: growX .6s cubic-bezier(.2,.8,.2,1) .6s both; }
+
+    .stroke-draw { stroke-linecap: round; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: drawLine 1.1s ease-out both; }
+    .stroke-draw.s1 { animation-delay: .35s; }
+    .stroke-draw.s2 { animation-delay: .5s; }
+    .stroke-draw.s3 { animation-delay: .6s; }
+
+    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(.94) } to { opacity: 1; transform: scale(1) } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: translateY(0) } }
+    @keyframes slideRight { from { opacity: 0; transform: translateX(-16px) } to { opacity: 1; transform: translateX(0) } }
+    @keyframes drawLine { from { stroke-dashoffset: 1000 } to { stroke-dashoffset: 0 } }
+    @keyframes growX { from { opacity: 0; transform: scaleX(0) } to { opacity: 1; transform: scaleX(1) } }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important }
+    }
+  </style>
+
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#EEF3FF"/>
+    </linearGradient>
+
+    <!-- Accent gradient for highlights -->
+    <linearGradient id="accent-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+
+    <!-- Soft glow radial gradients -->
+    <radialGradient id="glow-a" cx="50%" cy="50%" r="0.6">
+      <stop offset="0%" stop-color="#93C5FD" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#93C5FD" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-b" cx="50%" cy="50%" r="0.7">
+      <stop offset="0%" stop-color="#C4B5FD" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#C4B5FD" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Subtle shadow for sidebar and pills -->
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#1F2937" flood-opacity="0.15"/>
+    </filter>
+
+    <!-- Fine grid pattern overlay -->
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#DCE3F7" stroke-width="1"/>
+    </pattern>
+
+    <!-- Rounded corner clip path to constrain all artwork to the rounded canvas -->
+    <clipPath id="roundClip">
+      <rect x="0" y="0" width="1200" height="400" rx="12" ry="12"/>
+    </clipPath>
+  </defs>
+
+  <!-- All visible elements are clipped to the rounded canvas -->
+  <g clip-path="url(#roundClip)">
+
+  <!-- Background -->
+  <rect class="anim-bg" width="1200" height="400" fill="url(#bg-grad)" rx="12" ry="12"/>
+
+  <!-- Decorative glows -->
+  <circle class="anim-glow glow-a" cx="980" cy="-40" r="260" fill="url(#glow-a)"/>
+  <circle class="anim-glow glow-b" cx="1120" cy="320" r="240" fill="url(#glow-b)"/>
+
+  <!-- Subtle grid overlay -->
+  <rect class="anim-grid" width="1200" height="400" fill="url(#grid)" opacity="0.35"/>
+
+  <!-- Sidebar with series list -->
+  <g transform="translate(40,40)" filter="url(#softShadow)">
+    <g class="sidebar-in">
+      <rect x="0" y="0" width="300" height="320" rx="20" fill="#FFFFFF"/>
+      <!-- Sidebar header accent line -->
+      <rect x="24" y="28" width="44" height="6" rx="3" fill="url(#accent-grad)"/>
+      <text x="24" y="62" font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="600" fill="#111827" letter-spacing="0.3px">Series</text>
+
+      <!-- Embark (Depracated) -->
+      <g class="item item-1" transform="translate(24,96)">
+        <g class="item-anim">
+          <circle cx="10" cy="10" r="6" fill="#CBD5E1"/>
+          <text x="28" y="15" font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="16" fill="#6B7280">Embark (Depracated)</text>
+        </g>
+      </g>
+
+      <!-- Emergence (Depracated) -->
+      <g class="item item-2" transform="translate(24,152)">
+        <g class="item-anim">
+          <circle cx="10" cy="10" r="6" fill="#CBD5E1"/>
+          <text x="28" y="15" font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="16" fill="#6B7280">Emergence (Depracated)</text>
+        </g>
+      </g>
+
+      <!-- Elevation (highlight) -->
+      <g class="item item-3 active" transform="translate(16,208)">
+        <g class="item-anim">
+          <rect x="0" y="-6" width="268" height="44" rx="12" fill="#F3F6FF"/>
+          <rect x="12" y="7" width="18" height="18" rx="9" fill="url(#accent-grad)"/>
+          <text x="40" y="16" dominant-baseline="middle" font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="700" fill="#111827" letter-spacing="0.2px">Elevation</text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Main title area -->
+  <g transform="translate(380,90)">
+    <g class="title-in">
+      <!-- Accent shape behind title -->
+      <path class="stroke-draw s1" d="M0 120 C120 10, 300 10, 520 120" fill="none" stroke="url(#accent-grad)" stroke-width="8" opacity="0.25"/>
+      <text class="title-text" x="0" y="120" font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif" font-size="64" font-weight="800" fill="#0F172A" letter-spacing="0.5px">Evolution Series</text>
+      <rect class="underline" x="2" y="140" width="220" height="8" rx="4" fill="url(#accent-grad)"/>
+    </g>
+  </g>
+
+  <!-- Decorative corner arcs -->
+  <g class="corner-arcs" transform="translate(360,320)" opacity="0.35">
+    <path class="stroke-draw s2" d="M0 40 C120 -40, 240 -40, 360 40" fill="none" stroke="#C7D2FE" stroke-width="2"/>
+    <path class="stroke-draw s3" d="M40 60 C160 -20, 280 -20, 400 60" fill="none" stroke="#BFDBFE" stroke-width="2"/>
+  </g>
+
+  </g>
+</svg>
