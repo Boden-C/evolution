@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/lightmode.svg" alt="Evolution Logo" width="800"/>
+  <img src="docs/assets/header.svg" alt="Evolution Logo" width="800"/>
   <br>
   <h1>Evolution Series: State of the Art Open Language Models</h1>
   <h3>2025 Update - Introducing Elevation, the new flagship model</h3>
