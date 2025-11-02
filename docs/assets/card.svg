@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+<svg width="540" height="800" viewBox="0 0 540 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title>Evolution Series - Elevation Card</title>
   <desc>A square, modern card with abstract waves and left-aligned white text for Evolution Series featuring Elevation.</desc>
 
@@ -70,57 +70,59 @@
 
     <!-- Rounded clip -->
     <clipPath id="roundClip">
-      <rect x="0" y="0" width="800" height="800" rx="24" ry="24"/>
+      <rect x="0" y="0" width="540" height="800" rx="20" ry="20"/>
     </clipPath>
   </defs>
 
   <g clip-path="url(#roundClip)">
     <!-- Card background -->
-    <rect class="anim-bg" width="800" height="800" fill="url(#bg-grad)"/>
+    <rect class="anim-bg" width="540" height="800" fill="url(#bg-grad)"/>
 
     <!-- Decorative glows -->
-    <circle class="anim-glow glow-a" cx="640" cy="-40" r="340" fill="url(#glow-a)"/>
-    <circle class="anim-glow glow-b" cx="780" cy="560" r="300" fill="url(#glow-b)"/>
+  <!-- Repositioned glows for vertical layout -->
+  <circle class="anim-glow glow-a" cx="420" cy="-20" r="260" fill="url(#glow-a)"/>
+  <circle class="anim-glow glow-b" cx="520" cy="520" r="220" fill="url(#glow-b)"/>
 
     <!-- Subtle grid -->
-    <rect class="anim-grid" width="800" height="800" fill="url(#grid)" opacity="0.35"/>
+  <rect class="anim-grid" width="540" height="800" fill="url(#grid)" opacity="0.35"/>
 
     <!-- Abstract waves -->
-    <g class="anim-waves" opacity="1">
-      <path d="M -60 520 C 140 420, 380 630, 860 500 L 860 860 L -60 860 Z"
-            fill="url(#accent-grad)" opacity="0.28"/>
-      <path d="M -80 600 C 120 520, 360 700, 880 560 L 880 900 L -80 900 Z"
-            fill="#F1F5FF" opacity="0.9"/>
-      <path class="stroke-draw s1" d="M -40 560 C 160 480, 420 660, 840 520"
-            fill="none" stroke="#C7D2FE" stroke-width="3" opacity="0.8"/>
-      <path class="stroke-draw s2" d="M 40 660 C 220 560, 480 620, 760 640"
-            fill="none" stroke="#BFDBFE" stroke-width="2" opacity="0.8"/>
-      <path class="stroke-draw s3" d="M 0 700 C 200 600, 520 700, 820 680"
-            fill="none" stroke="url(#accent-grad)" stroke-width="4" opacity="0.32"/>
+    <g class="anim-waves" opacity="1" transform="translate(-40,0) scale(0.68,1)">
+  <!-- Scaled and shifted waves to fit narrower card -->
+  <path d="M -60 520 C 140 420, 380 630, 860 500 L 860 860 L -60 860 Z"
+    fill="url(#accent-grad)" opacity="0.28"/>
+  <path d="M -80 600 C 120 520, 360 700, 880 560 L 880 900 L -80 900 Z"
+    fill="#F1F5FF" opacity="0.9"/>
+  <path class="stroke-draw s1" d="M -40 560 C 160 480, 420 660, 840 520"
+    fill="none" stroke="#C7D2FE" stroke-width="3" opacity="0.8"/>
+  <path class="stroke-draw s2" d="M 40 660 C 220 560, 480 620, 760 640"
+    fill="none" stroke="#BFDBFE" stroke-width="2" opacity="0.8"/>
+  <path class="stroke-draw s3" d="M 0 700 C 200 600, 520 700, 820 680"
+    fill="none" stroke="url(#accent-grad)" stroke-width="4" opacity="0.32"/>
     </g>
 
     <!-- Content: left-aligned stack -->
-    <g class="content-in" transform="translate(64,200)" filter="url(#softShadow)">
-      <!-- My State-of-the-Art LLM Models -->
-      <text x="5" y="0"
+    <g class="content-in" transform="translate(36,136)" filter="url(#softShadow)">
+      <!-- Slightly larger, left-aligned copy for vertical card -->
+      <text x="6" y="0"
             font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
-            font-size="30" font-weight="400" letter-spacing="0.2px" fill="#111827">
+            font-size="20" font-weight="400" letter-spacing="0.1px" fill="#111827">
         My State-of-the-Art LLM Models
       </text>
 
       <!-- Evolution Series -->
-      <text x="0" y="90"
+      <text x="0" y="62"
             font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
-            font-size="80" font-weight="700" letter-spacing="0.4px" fill="#0F172A">
+            font-size="52" font-weight="700" letter-spacing="0.2px" fill="#0F172A">
         Evolution Series
       </text>
 
       <!-- Click to see the newest model -->
-      <text x="5" y="200"
+      <text x="6" y="138"
             font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
-            font-size="32" font-weight="400" letter-spacing="0.2px" fill="#374151">
+            font-size="16" font-weight="400" letter-spacing="0.08px" fill="#374151">
         Click to see the newest model:
-        <tspan x="5" dy="38" font-weight="700">Elevation</tspan>
+        <tspan x="6" dy="28" font-weight="700" font-size="18">Elevation</tspan>
       </text>
     </g>
   </g>
