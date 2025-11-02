@@ -103,26 +103,25 @@
 
     <!-- Content: left-aligned stack -->
     <g class="content-in" transform="translate(36,136)" filter="url(#softShadow)">
-      <!-- Slightly larger, left-aligned copy for vertical card -->
       <text x="6" y="0"
             font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
-            font-size="20" font-weight="400" letter-spacing="0.1px" fill="#111827">
+            font-size="30" font-weight="400" letter-spacing="0.1px" fill="#111827">
         My State-of-the-Art LLM Models
       </text>
 
-      <!-- Evolution Series -->
-      <text x="0" y="62"
+      <text x="5" y="100"
             font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
-            font-size="52" font-weight="700" letter-spacing="0.2px" fill="#0F172A">
-        Evolution Series
+            font-size="80" font-weight="560" letter-spacing="0.2px" fill="#0F172A">
+        Evolution
+        <tspan x="5" dy="80">Series</tspan>
       </text>
 
       <!-- Click to see the newest model -->
-      <text x="6" y="138"
+      <text x="6" y="300"
             font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
-            font-size="16" font-weight="400" letter-spacing="0.08px" fill="#374151">
+            font-size="30" font-weight="400" letter-spacing="0.08px" fill="#374151">
         Click to see the newest model:
-        <tspan x="6" dy="28" font-weight="700" font-size="18">Elevation</tspan>
+        <tspan x="6" dy="50" font-weight="700" font-size="40">Elevation</tspan>
       </text>
     </g>
   </g>
