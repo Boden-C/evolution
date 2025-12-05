@@ -101,7 +101,7 @@ To train and build Elevation from source:
 1. Install [PyTorch](https://pytorch.org) and required dependencies for your system.
 2. Clone the Evolution repository:
     ```bash
-    git clone https://github.com/YOUR_ORG/Evolution.git
+    git clone https://github.com/Boden-C/evolution.git
     cd Evolution
     pip install -e .[all]
     ```
